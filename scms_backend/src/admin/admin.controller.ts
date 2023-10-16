@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Query,
   Put,
   Delete,
   Param,
@@ -16,25 +15,29 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('producer')
-  getHello(): string {
-    return this.adminService.getHello();
+  getHello() {
+    return this.adminService.getAll();
   }
-  @Post('producer')
+
+  @Post('addproducer')
   addProducer(@Body() producerInfo: ProducerInfo): object {
     return this.adminService.addProducer(producerInfo);
   }
-  @Get('searchproducer')
-  searchProducer(@Query('name') name: string, @Query('id') id: number): object {
-    return this.adminService.searchProducer(name, id);
-  }
-  @Put('producer/:id')
-  updateProducer(@Param('id') id: number): string {
-    return this.adminService.updateProducer(id);
-  }
-  @Delete('producer/:id')
-  deleteProducer(@Param('id') id: number): string {
-    return this.adminService.deleteProducer(id);
+  @Get('/searchproducerby/:id')
+  searchProducer(@Param('id') userID: number): Promise<AdminEntity> {
+    return this.adminService.getProducerByID(userID);
   }
 
-  //   @Delete('')
+  @Put('producer/update/:id')
+  updateProducer(@Param('id') id: number, @Body() producerInfo: ProducerInfo) {
+    return this.adminService.updateProducer(id, producerInfo);
+  }
+
+  @Delete('producer/:id')
+  deleteProducer(@Param('id') id: number): object {
+    const user = this.adminService.remove(id);
+    return {
+      message: 'Successfully Deleted User',
+    };
+  }
 }

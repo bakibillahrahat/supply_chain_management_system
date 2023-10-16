@@ -1,25 +1,44 @@
 import { Body, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ProducerEntity } from './producer.dto';
+import { Repository } from 'typeorm';
 import { ProducerInfo } from './producer.dto';
 
 @Injectable()
 export class AdminService {
-  getHello(): string {
-    return 'Show All Product Producers!';
+  constructor(
+    @InjectRepository(ProducerEntity)
+    private producerRepo: Repository<ProducerEntity>,
+  ) {}
+  // for show all producer
+  getAll(): Promise<ProducerEntity[]> {
+    return this.producerRepo.find({
+      select: {
+        username: true,
+      },
+    });
   }
-  addProducer(producerInfo: ProducerInfo): object {
-    return {
-      id: producerInfo.id,
-      name: producerInfo.name,
-      email: producerInfo.email,
-    };
+  // search producer by id
+  getProducerByID(id: number): Promise<ProducerEntity> {
+    return this.producerRepo.findOneBy({ id: id });
   }
-  searchProducer(name: string, id: number): object {
-    return { userid: id, nusername: name };
+  // add Producer
+  async addProducer(producerInfo: ProducerInfo): Promise<ProducerEntity[]> {
+    const res = await this.producerRepo.save(producerInfo);
+    return this.producerRepo.find();
   }
-  updateProducer(id): string {
-    return `User id ${id} updated`;
+  // update producer info
+  updateProducer(
+    id: number,
+    producerInfo: ProducerInfo,
+  ): Promise<ProducerEntity> {
+    const res = this.producerRepo.update(id, producerInfo);
+
+    return this.producerRepo.findOneBy({ id });
   }
-  deleteProducer(id): string {
-    return `User id ${id} Deleted`;
+  // delete producer info
+  async remove(id: number): Promise<void> {
+    await this.producerRepo.delete(id);
   }
+
 }
